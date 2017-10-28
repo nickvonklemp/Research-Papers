@@ -1,1 +1,3 @@
 # papers
+Tex repository for scientific papers and journal submissions
+Typical IEEE templates used...
