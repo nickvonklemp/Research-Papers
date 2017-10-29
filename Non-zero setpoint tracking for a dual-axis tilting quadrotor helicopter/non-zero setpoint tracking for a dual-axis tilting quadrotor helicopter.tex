@@ -33,7 +33,7 @@ Non-zero Setpoint Tracking for a Dual-Axis Tilting Quadrotor Helicopter
 %=========================================================
 \begin{abstract}
 %=========================================================
-This work applies non-zero attitude and position setpoint tracking to a quadrotor helicopter; equipped with additional motors to solve the problem of a quadrotor's inherent underactuation. Introduction of overactuation results in a multibody, non-linear system to be modelled and stabilized. High level setpoint tracking controllers design virtual control inputs which are then allotted out to the plant's actuators by a lower level allocation rule. The non-linear state-space controller(s) are optimized iteratively using a swarm algorithm; producing a control suite that successfully follows a simple orbital trajectory, demonstrating non-zero setpoint tracking.
+This work applies non-zero attitude and position setpoint tracking to a quadrotor helicopter; equipped with additional motors to solve the problem of a quadrotor's inherent under-actuation. Introduction of over-actuation results in a multibody, non-linear system to be modelled and stabilized. High level setpoint tracking controllers design virtual control inputs which are then allotted out to the plant's actuators by a lower level allocation rule. The non-linear state-space controller(s) are optimized iteratively using a swarm algorithm; producing a control suite that successfully follows a simple orbital trajectory, demonstrating non-zero setpoint tracking.
 \\
 \emph{Index terms}--- control, non-linear, over actuated, optimization, quadrotor
 %=========================================================
@@ -42,9 +42,9 @@ This work applies non-zero attitude and position setpoint tracking to a quadroto
 %=========================================================
 \section{INTRODUCTION}
 %=========================================================
-Quadrotor helicopters, ostensibly puplished first in \cite{x4flyer}, are currently a popular control research field. This is due to recent advances in cheap embedded systems which can implement the autonomous vehicle's control loop. Quadrotor helicopters are inherently underactuated with only four controllable inputs (namely the four propeller's rotational speeds) to articulate a 6 degree of freedom (\emph{DOF}) body; making the control problem ill-posed. Standard control solutions linearize the plant around the attitude's origin; thus reducing the system's controllable degrees of freedom. 
+Quadrotor helicopters, ostensibly puplished first in \cite{x4flyer}, are currently a popular control research field. This is due to recent advances in cheap embedded systems which can implement the autonomous vehicle's control loop. Quadrotor helicopters are inherently under-actuated with only four controllable inputs (namely the four propeller's rotational speeds) to articulate a 6 degree of freedom (\emph{DOF}) body; making the control problem ill-posed. Standard control solutions linearize the plant around the attitude's origin; thus reducing the system's controllable degrees of freedom. 
 \par
-What follows is a controller design which achieves non-zero attitude and position setpoint tracking for a quadrotor by introducing overactuation to the vehicle, without any linearisation of the dynamic equations of motion. A higher level controller designs net torque and force inputs to be applied to the multibody vehicle about its center of motion. A lower level allocation rule then distributes that virtual control input amongst the actuator set to be implemented.
+What follows is a controller design which achieves non-zero attitude and position setpoint tracking for a quadrotor by introducing over-actuation to the vehicle, without any linearisation of the dynamic equations of motion. A higher level controller designs net torque and force inputs to be applied to the multibody vehicle about its center of motion. A lower level allocation rule then distributes that virtual control input amongst the actuator set to be implemented.
 \par
 Over-actuated control is commonly presented in the context of satellite attitude control. Typically a satellite's extra actuators are included for the sake of fault tolerance, implemented only when higher priority acutators fail mechanically. Fault tolerant control for satellites is discussed in \cite{ftcallocation}, where the additional actuators are included for redundancy rather than complementing a control input. Alternatively, \cite{quaternionbackstep} uses quaternion based backstepping to track a satellite's orbital trajectory whilst making use of all available actuators via a pseudo-inversion allocation rule. A series of allocation schemes is surveyed in \cite{allocation}, most of which apply some form of matrix inversion to find explicit actuator positions.
 \par
@@ -62,7 +62,7 @@ Two Cartesian reference frames are used; first the fixed inertial frame $\mathca
 v_b=Q_b\otimes \vec{v}_I \otimes Q_b^*~~~~\in\mathcal{F}^{b}
 \end{equation}
 Where $Q_b=\begin{bmatrix}q_0 & \vec{q}\hspace{2pt}\end{bmatrix}^T$ is the attitude quaternion, $Q_b^*$ is the quaternion complex conjugate and $\otimes$ is the Hamilton product between two quaternions. Quaternion operands with zero scalar components are implied for the operation in (\ref{eq:quaternion-operation}). Quaternions are discussed thoroughly in \cite{shoemaker}. \par
-The prototype's design extends the actuation suite of a regular quadcopter, such as \cite{x4flyer}, to an overactuated 12-\emph{DOF} system by introducing eight additional actuator inputs.
+The prototype's design extends the actuation suite of a regular quadcopter, such as \cite{x4flyer}, to an over-actuated 12-\emph{DOF} system by introducing eight additional actuator inputs.
 \newpage
 \begin{figure}[tbp]
 \centering
@@ -72,7 +72,7 @@ The prototype's design extends the actuation suite of a regular quadcopter, such
 \label{fig:force-redirect}
 \vspace{-18pt}
 \end{figure}
-A standard quadrotor comprises of only four controllable inputs; those being each propeller's rotational speeds $\Omega_{i}$ for $i\in[1:4]$, which underactuates the control plant. The design here adds two revolute actuators to respectively pitch and roll \emph{each} of the four motors and propellers about their $\hat{X}_{M_i}$ and $\hat{Y}_{M_i}$ axes, shown in Fig:\ref{fig:force-redirect}. 
+A standard quadrotor comprises of only four controllable inputs; those being each propeller's rotational speeds $\Omega_{i}$ for $i\in[1:4]$, which under-actuates the control plant. The design here adds two revolute actuators to respectively pitch and roll \emph{each} of the four motors and propellers about their $\hat{X}_{M_i}$ and $\hat{Y}_{M_i}$ axes, shown in Fig:\ref{fig:force-redirect}. 
 \par
 The \emph{motor module} frame $\mathcal{F}^{M_i}$ is attached to the $i^{\text{th}}$ motor, whose propeller produces an input thrust in the $\hat{Z}_{M_i}$ axis direction of its frame. The produced thrust vector $\vec{T}(\Omega_i)$ is calculated using blade-element-momentumn (\emph{BEM}) theory, \cite{nonlineardynamics}. The two gimbal actuators rotate the motor/propeller to vector the produced thrust; first about its $\hat{X}_{M_i}$ axis by an angle of $\lambda_i$, and then about an intermediate frame's $\hat{Y}_{M_i'}$ axis by an angle of $\alpha_i$.  Thrust and aerodynamic drag coefficients, $C_T$ and $C_Q$ respectively, relate the propeller's rotational speed to its produced thrust and drag torque as per:
 \begin{subequations}\label{eq:bem}
