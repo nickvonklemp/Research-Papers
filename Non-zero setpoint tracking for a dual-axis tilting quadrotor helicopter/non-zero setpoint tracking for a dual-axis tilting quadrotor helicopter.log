@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9.6210 64-bit) (preloaded format=pdflatex 2017.3.22)  28 OCT 2017 09:43
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9.6210 64-bit) (preloaded format=pdflatex 2017.3.22)  29 OCT 2017 22:56
 entering extended mode
 **"./non-zero setpoint tracking for a dual-axis tilting quadrotor helicopter.te
 x"
@@ -406,29 +406,38 @@ Underfull \hbox (badness 5878) in paragraph at lines 30--30
 
  []
 
-<figs/force-redirect.png, id=1, 1278.27562pt x 869.49844pt>
-File: figs/force-redirect.png Graphic file (type png)
-
-<use figs/force-redirect.png>
-Package pdftex.def Info: figs/force-redirect.png used on input line 66.
-(pdftex.def)             Requested size: 252.94499pt x 172.05243pt.
-
-Overfull \hbox (7.22688pt too wide) in paragraph at lines 66--68
- [][] 
- []
-
 [1{C:/ProgramData/MiKTeX/2.9/pdftex/config/pdftex.map}
 
 
 ]
+<figs/force-redirect.png, id=19, 1278.27562pt x 869.49844pt>
+File: figs/force-redirect.png Graphic file (type png)
+
+<use figs/force-redirect.png>
+Package pdftex.def Info: figs/force-redirect.png used on input line 69.
+(pdftex.def)             Requested size: 252.94499pt x 172.05243pt.
+
+Overfull \hbox (7.22688pt too wide) in paragraph at lines 69--71
+ [][] 
+ []
+
+LaTeX Font Info:    Try loading font information for TS1+ptm on input line 89.
+("C:\Program Files\MiKTeX 2.9\tex\latex\psnfss\ts1ptm.fd"
+File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
+)
+Underfull \hbox (badness 1946) in paragraph at lines 91--94
+[]\OT1/ptm/m/n/10 Motors $\OT1/cmr/m/n/10 1$ \OT1/ptm/m/n/10 and $\OT1/cmr/m/n/
+10 3$ \OT1/ptm/m/n/10 have clock-wise pro-peller ro-ta-tions
+ []
+
 <figs/body-frame.png, id=20, 876.27374pt x 888.31876pt>
 File: figs/body-frame.png Graphic file (type png)
 
 <use figs/body-frame.png>
-Package pdftex.def Info: figs/body-frame.png used on input line 123.
+Package pdftex.def Info: figs/body-frame.png used on input line 127.
 (pdftex.def)             Requested size: 252.94499pt x 256.41302pt.
 
-Overfull \hbox (7.22688pt too wide) in paragraph at lines 123--125
+Overfull \hbox (7.22688pt too wide) in paragraph at lines 127--129
  [][] 
  []
 
@@ -437,46 +446,40 @@ Overfull \hbox (7.22688pt too wide) in paragraph at lines 123--125
 File: figs/response-body.png Graphic file (type png)
 
 <use figs/response-body.png>
-Package pdftex.def Info: figs/response-body.png used on input line 157.
+Package pdftex.def Info: figs/response-body.png used on input line 163.
 (pdftex.def)             Requested size: 252.94499pt x 197.96613pt.
 
-Overfull \hbox (7.22688pt too wide) in paragraph at lines 157--159
+Overfull \hbox (7.22688pt too wide) in paragraph at lines 163--165
  [][] 
  []
 
 [3 <./figs/response-body.png>] [4]
-LaTeX Font Info:    Try loading font information for TS1+ptm on input line 383.
-
-
-("C:\Program Files\MiKTeX 2.9\tex\latex\psnfss\ts1ptm.fd"
-File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-)
 <figs/attitude-step.png, id=38, 865.73438pt x 338.76563pt>
 File: figs/attitude-step.png Graphic file (type png)
 
 <use figs/attitude-step.png>
-Package pdftex.def Info: figs/attitude-step.png used on input line 439.
+Package pdftex.def Info: figs/attitude-step.png used on input line 444.
 (pdftex.def)             Requested size: 227.64894pt x 89.07979pt.
 
 <figs/position-step.png, id=39, 865.73438pt x 338.76563pt>
 File: figs/position-step.png Graphic file (type png)
 
 <use figs/position-step.png>
-Package pdftex.def Info: figs/position-step.png used on input line 447.
+Package pdftex.def Info: figs/position-step.png used on input line 452.
 (pdftex.def)             Requested size: 227.64894pt x 89.07979pt.
  [5]
 <figs/attitude-trajectory.png, id=43, 865.73438pt x 338.76563pt>
 File: figs/attitude-trajectory.png Graphic file (type png)
 
 <use figs/attitude-trajectory.png>
-Package pdftex.def Info: figs/attitude-trajectory.png used on input line 464.
+Package pdftex.def Info: figs/attitude-trajectory.png used on input line 469.
 (pdftex.def)             Requested size: 227.64894pt x 89.07979pt.
 
 <figs/position-trajectory.png, id=44, 865.73438pt x 338.76563pt>
 File: figs/position-trajectory.png Graphic file (type png)
 
 <use figs/position-trajectory.png>
-Package pdftex.def Info: figs/position-trajectory.png used on input line 472.
+Package pdftex.def Info: figs/position-trajectory.png used on input line 477.
 (pdftex.def)             Requested size: 227.64894pt x 89.07979pt.
 
 
@@ -495,13 +498,13 @@ ctory.png> <./figs/position-trajectory.png>]
 ("non-zero setpoint tracking for a dual-axis tilting quadrotor helicopter.aux")
  ) 
 Here is how much of TeX's memory you used:
- 3864 strings out of 493333
- 55927 string characters out of 3139197
- 129967 words of memory out of 3000000
+ 3863 strings out of 493333
+ 55921 string characters out of 3139197
+ 129966 words of memory out of 3000000
  7319 multiletter control sequences out of 15000+200000
- 47058 words of font info for 107 fonts, out of 3000000 for 9000
+ 45991 words of font info for 106 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 39i,11n,26p,1609b,289s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 39i,11n,26p,947b,289s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Program Files/MiKTeX 2.9/fonts/enc/dvips/base/8r.enc}<C:/Program Files/Mi
 KTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Program Files/MiKTeX 2.9
 /fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Program Files/MiKTeX 2.9/fonts/t
@@ -523,7 +526,7 @@ TeX 2.9/fonts/type1/urw/times/utmbi8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/ty
 pe1/urw/times/utmr8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/times/utm
 ri8a.pfb>
 Output written on "non-zero setpoint tracking for a dual-axis tilting quadrotor
- helicopter.pdf" (6 pages, 1565194 bytes).
+ helicopter.pdf" (6 pages, 1562493 bytes).
 PDF statistics:
  113 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

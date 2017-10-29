@@ -33,89 +33,93 @@ Non-zero Setpoint Tracking for a Dual-Axis Tilting Quadrotor Helicopter
 %=========================================================
 \begin{abstract}
 %=========================================================
-This work applies non-zero attitude and position setpoint tracking to a quadrotor helicopter; achieved by mechanically solving the problem of a quadrotor's inherent underactuation. Introduction of overactuation results in a multibody, non-linear system to be modelled and stabilized. High level setpoint tracking controllers design virtual control inputs which are then allotted out to the plant's actuators by a lower level allocation rule. The non-linear state-space controller(s) are optimized iteratively using a swarm algorithm; producing a control suite that successfully tracks an orbital trajectory.
+This work applies non-zero attitude and position setpoint tracking to a quadrotor helicopter; equipped with additional motors to solve the problem of a quadrotor's inherent underactuation. Introduction of overactuation results in a multibody, non-linear system to be modelled and stabilized. High level setpoint tracking controllers design virtual control inputs which are then allotted out to the plant's actuators by a lower level allocation rule. The non-linear state-space controller(s) are optimized iteratively using a swarm algorithm; producing a control suite that successfully follows a simple orbital trajectory, demonstrating non-zero setpoint tracking.
+\\
+\emph{Index terms}--- control, non-linear, over actuated, optimization, quadrotor
 %=========================================================
 \end{abstract}
 %=========================================================
-\textbf{\emph{Index terms}--- control, non-linear, over actuated, optimization, quadrotor}
 %=========================================================
 \section{INTRODUCTION}
 %=========================================================
-Quadrotor helicopters, first puplished in \cite{x4flyer}, are currently an extremely popular field of control research. As almost every quadrotor based papers will mention; this is due to a recent advent in cheap embedded systems for implementation of the UAV's control loop. Quadrotor helicopters are inherently underactuated, making the control plant ill-posed. Their control problem is design of 4 controllable inputs (namely the four propeller's rotational speed) to articulate a 6 degree of freedom (\emph{DOF}) body. Standard control solutions linearize the plant around the attitude's origin; reducing the degrees of controllable freedom the system has. What follows is a proposal that achieves non-zero setpoint tracking for a quadrotor by introducing overactuation to the vehicle, apply no such linearisation to the dynamic equations of motion. A high level control law designs net torque and force inputs to be applied to the multibody vehicle about it's center of motion. A lower level allocation rule then allots out that virtual control input amongst the actuator set to be physically implemented.
+Quadrotor helicopters, ostensibly puplished first in \cite{x4flyer}, are currently a popular control research field. This is due to recent advances in cheap embedded systems which can implement the autonomous vehicle's control loop. Quadrotor helicopters are inherently underactuated with only four controllable inputs (namely the four propeller's rotational speeds) to articulate a 6 degree of freedom (\emph{DOF}) body; making the control problem ill-posed. Standard control solutions linearize the plant around the attitude's origin; thus reducing the system's controllable degrees of freedom. 
 \par
-Over actuated control is most common in the context of satellite attitude control. Typically a satellite's extra actuators are included for the sake of fault tolerance, implemented only when higher priority acutators fail mechanically. Fault tolerant control for satellites is discussed in \cite{ftcallocation}, where the additional actuators are included for redundancy rather than complementing a control input. Alternatively, \cite{quaternionbackstep} implemented quaternion based backstepping to track a satellite's orbital trajectory whilst making use of all available actuators, using a pseudo-inversion allocation rule. 
-\\
-A series of allocation schemes is surveyed in \cite{allocation}, most allocation applies some sort of inversion to find explicit actuator positions.
+What follows is a controller design which achieves non-zero attitude and position setpoint tracking for a quadrotor by introducing overactuation to the vehicle, without any linearisation of the dynamic equations of motion. A higher level controller designs net torque and force inputs to be applied to the multibody vehicle about its center of motion. A lower level allocation rule then distributes that virtual control input amongst the actuator set to be implemented.
 \par
-Not much work has been done on reconfigurable aerospace vehicles. The only commerical example is the DJI Inspire1 which only can raise or lower it's support arms. Reconfigurable aerospace frames are usually avoided due to their dynamic complexities. Dual-axis tilting capabilities are often incorporated into birotor aircraft; \cite{ggress} presented a dual-axis tilting bi-rotor design but in the control constrained the actuation to an effective single axis of tilt. In the case of tilting quadrotor aircraft, \cite{tiltingmodelling} proposed a single co-axial rotation of a quadrotor's propellers which was subsequently tested in \cite{tiltingtest}. Another paper, \cite{nemati}, similarly proposed a single axis tilting quadrotor aircraft. Neither single axis quadrotor papers consider the dynamic consequences of reconfiguring the quadcopter mid-flight. The only dual-axis tilting quadrotor work, \cite{tiltgasco}, treats the control inputs as a regular fixed axis quadrotor, but with an introduced actuator plant that produces gyroscopic torque from pitching/rolling the rotating propeller module.
+Over-actuated control is commonly presented in the context of satellite attitude control. Typically a satellite's extra actuators are included for the sake of fault tolerance, implemented only when higher priority acutators fail mechanically. Fault tolerant control for satellites is discussed in \cite{ftcallocation}, where the additional actuators are included for redundancy rather than complementing a control input. Alternatively, \cite{quaternionbackstep} uses quaternion based backstepping to track a satellite's orbital trajectory whilst making use of all available actuators via a pseudo-inversion allocation rule. A series of allocation schemes is surveyed in \cite{allocation}, most of which apply some form of matrix inversion to find explicit actuator positions.
 \par
-The remainder of this paper is arranged as follows; the prototype's design and it's reference conventions are briefly described in \ref{sec:design}. Thereafter, \ref{sec:dynamics} presents the state differential dynamic model used for 6-DOF equations of motion, including the multibody non-linearities which stem from the prototype's structure and mid-flight reconfiguration. Position and attitude controllers are derived in \ref{sec:control}, together with an allocation rule. Each control law's coefficients are designed using a swarm optimization discussed in \ref{sec:optimization}. Finally setpoint tracking is empirically tested in \ref{sec:setpoint} with conclusions drawn in \ref{sec:conclusion}.
+Some work has been done on reconfigurable aerospace vehicles; the most obvious commercial example beingf the Bell/Boeing V-22 Osprey. Reconfigurable aerospace frames are, however, usually avoided due to their dynamic complexity. Dual-axis tilting capabilities are often incorporated into birotor aircraft; \cite{ggress} presented a dual-axis tilting bi-rotor design but in the control constrained the actuation to a single axis of tilt. 
+\par
+In the case of tilting quadrotor aircraft, \cite{tiltingmodelling} proposed a single co-axial rotation of a quadrotor's propellers which was subsequently tested in \cite{tiltingtest}. Similarly, \cite{nemati} proposed a single-axis tilting quadrotor aircraft. Neither of these single-axis quadrotor papers consider the dynamic implications of reconfiguring the quadcopter mid-flight. One dual-axis tilting quadrotor work, \cite{tiltgasco}, treats the control inputs as a regular fixed axis quadrotor, but with an introduced actuator plant that produces gyroscopic torque from pitching the rotating propeller module.
+\par
+The remainder of this paper is arranged as follows; the prototype's design and its reference conventions are briefly described in \ref{sec:design}. Thereafter, \ref{sec:dynamics} presents the state differential dynamic model used for 6-DOF equations of motion, including the multibody non-linearities which stem from the prototype's structure and in-flight reconfiguration. Position and attitude controllers are derived in \ref{sec:control}, together with an allocation rule. Each control law's coefficients are selected using a swarm optimization discussed briefly in \ref{sec:optimization}. Finally setpoint tracking is verified with simulations in \ref{sec:setpoint} and conclusions are subsequently drawn in \ref{sec:conclusion}.
 %=========================================================
 \section{Design and Conventions} 
 \label{sec:design}
 %=========================================================
-Two Cartesian reference frames are considered here; first the fixed inertial frame $\mathcal{F}^{I}$ which all motion is taken with respect to. Secondly the body frame $\mathcal{F}^{b}$ which is attached and centred on the vehicle itself. Rotation (or \emph{transformation}) of some vector $\vec{v}_I$ from the inertial frame to the body frame is applied by a quaternion operation:
+Two Cartesian reference frames are used; first the fixed inertial frame $\mathcal{F}^{I}$ which all motion is taken with respect to. Secondly the body frame $\mathcal{F}^{b}$ which is attached and centred on the vehicle itself. Rotation (or \emph{transformation}) of some vector $\vec{v}_I$ from the inertial frame to the body frame is achieved with a quaternion operation:
 \begin{equation}\label{eq:quaternion-operation}
 v_b=Q_b\otimes \vec{v}_I \otimes Q_b^*~~~~\in\mathcal{F}^{b}
 \end{equation}
-Wherein $Q_b=\begin{bmatrix}q_0 & \vec{q}\hspace{2pt}\end{bmatrix}^T$ is the attitude's quaternion, $Q_b^*$ is the quaternion complex conjugate and $\otimes$ is the hamilton product between two quaternions. Quaternions are detailed thoroughly in \cite{shoemaker}, if such concepts are unfamiliar to the 
-reader\ldots
-\par
+Where $Q_b=\begin{bmatrix}q_0 & \vec{q}\hspace{2pt}\end{bmatrix}^T$ is the attitude quaternion, $Q_b^*$ is the quaternion complex conjugate and $\otimes$ is the Hamilton product between two quaternions. Quaternion operands with zero scalar components are implied for the operation in (\ref{eq:quaternion-operation}). Quaternions are discussed thoroughly in \cite{shoemaker}. \par
+The prototype's design extends the actuation suite of a regular quadcopter, such as \cite{x4flyer}, to an overactuated 12-\emph{DOF} system by introducing eight additional actuator inputs.
+\newpage
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=0.5\textwidth]{figs/force-redirect}
-\vspace{-20pt}
-\caption{Actuator motor module}
+\vspace{-14pt}
+\caption{Actuator motor module with vectored thrust}
 \label{fig:force-redirect}
-\vspace{-16pt}
+\vspace{-18pt}
 \end{figure}
+A standard quadrotor comprises of only four controllable inputs; those being each propeller's rotational speeds $\Omega_{i}$ for $i\in[1:4]$, which underactuates the control plant. The design here adds two revolute actuators to respectively pitch and roll \emph{each} of the four motors and propellers about their $\hat{X}_{M_i}$ and $\hat{Y}_{M_i}$ axes, shown in Fig:\ref{fig:force-redirect}. 
 \par
-The prototype extends the actuation suite of a regular quadcopter, such as \cite{x4flyer}, to an overactuated 12-\emph{DOF} system by introducing 8 additional actuator plants. A standard quadrotor consists of only 4 controllable inputs; namely each of the propeller's rotational speeds $\Omega_{1\rightarrow 4}$, under actuating the control plant. The design here adds 2 revolute actuators to respectively pitch and roll \emph{each} of the 4 motors and propellers about their $\hat{X}_{M_i}$ and $\hat{Y}_{M_i}$ axes, aligned as per Fig:\ref{fig:force-redirect}.
-\par
-The \emph{motor module} frame $\mathcal{F}^{M_i}$ is attached to the $i^{\text{th}}$ motor ($i\in[1:4]$), whose propeller produces an input thrust in the $\hat{Z}_{M_i}$ axis direction of it's frame. The two actautors rotate the motor/propeller in sequential gimbal-like fashion; first about it's $\hat{X}_{M_i}$ axis by an angle of $\lambda_i$. Then about an intermediate frame's $\hat{Y}_{M_i'}$ axis by an angle of $\alpha_i$. The resultant thrust vector $\vec{T}(\Omega_i)$ in the $\hat{Z}_{M_i}$ direction is calculated using blade-element-momentumn (\emph{BEM}) theory, \cite{nonlineardynamics}. Thrust and power coefficients, $C_T$ and $C_P$ respectively, relate the propeller's rotational speed in $[\text{RPS}]$ to it's produced thrust and aerodynamic torque as per:
+The \emph{motor module} frame $\mathcal{F}^{M_i}$ is attached to the $i^{\text{th}}$ motor, whose propeller produces an input thrust in the $\hat{Z}_{M_i}$ axis direction of its frame. The produced thrust vector $\vec{T}(\Omega_i)$ is calculated using blade-element-momentumn (\emph{BEM}) theory, \cite{nonlineardynamics}. The two gimbal actuators rotate the motor/propeller to vector the produced thrust; first about its $\hat{X}_{M_i}$ axis by an angle of $\lambda_i$, and then about an intermediate frame's $\hat{Y}_{M_i'}$ axis by an angle of $\alpha_i$.  Thrust and aerodynamic drag coefficients, $C_T$ and $C_Q$ respectively, relate the propeller's rotational speed to its produced thrust and drag torque as per:
 \begin{subequations}\label{eq:bem}
 \begin{equation}\label{eq:bem-thrust}
-\vec{T}(\Omega_i)=C_T(J)\rho\Omega_i^2D^4\cdot\hat{Z}_{M_i}~~~~[\text{N}]
+\vec{T}(\Omega_i)=C_T(J)\rho\Omega_i^2D^4\cdot\hat{Z}~~~~\in\mathcal{F}^{M_i}
 \end{equation}
-\vspace{-12pt}
+\vspace{-8pt}
 \begin{equation}\label{eq:bem-torque}
-\vec{\tau}_Q(\Omega)_i=C_P(J)\rho\Omega_i^3D^5(1/R\Omega_i)\cdot\hat{Z}_{M_i}~~~~[\text{Nm}]
+\vec{H}(\Omega_i)=C_Q(J)\rho\Omega_i^3D^5(1/R\Omega_i)\cdot\hat{Z}~~~~\in\mathcal{F}^{M_i}
 \end{equation}
 \end{subequations}
-Where $J$ is the propeller's advance ratio, $\rho$ is the air density taken  at \emph{STP} and $D$ is the propeller's diameter in $[\text{m}]$. Further details of BEM theorey and a propeller's aerodynamics are presented in \cite{nonlineardynamics}. Each thrust and power coefficient used was linearly interpolated from data in \cite{lowreynolds} to match physical tests applied to the hardware under consideration.
+Where $J$ is the propeller's advance ratio, $\rho$ is the air density taken  at \emph{standard temperatute} and \emph{pressure} and $D$ is the propeller's diameter. Further details of BEM theory and a propeller's aerodynamics are presented in \cite{nonlineardynamics}. Each thrust and drag coefficient used was linearly interpolated from data in \cite{lowreynolds} to match physical tests applied to the hardware under consideration.
 \par
-Each of the four motor modules, in Fig:\ref{fig:force-redirect}, are aligned relative to the body frame's center $\vec{\mathbf{O}}_b$ as per Fig:\ref{fig:body-frame}. The $1^{\text{st}}$ and $3^{\text{rd}}$ motor modules have their positive and negative $\pm\hat{X}_{M_1/M_3}$ axes aligned with the body frame's $\hat{X}_b$ axis. While the $2^{\text{nd}}$ and $4^{\text{th}}$ modules have their positive and negative $\pm\hat{Y}_{M_2/M_4}$ axes aligned with the $\hat{Y}_b$ body frame's axis. Motors $1$ and $3$ have clockwise propeller rotations, $+\Omega_{1/3}$, whereas motors $2$ and $4$ have anti-clockwise propeller rotations, $-\Omega_{2/4}$. An instantaneous configuration of the multibody system is fully described by the 4 propeller's rotational speed and the 8 additional actuator rotational positions. 
+Each of the four motor modules is aligned relative to the body frame's center $\vec{\mathbf{O}}_b$ as per Fig:\ref{fig:body-frame}. The $1^{\text{st}}$ and $3^{\text{rd}}$ motor modules have their $\hat{X}_{M_1/M_3}$ axes aligned with the body frame's positive and negative $\pm\hat{X}_b$ axis directions respectively. While the $2^{\text{nd}}$ and $4^{\text{th}}$ modules have their $\hat{Y}_{M_2/M_4}$ axis directions aligned with the positive and negative $\pm\hat{Y}_b$ body frame's axes respectively. There is a $90\text{\textdegree}$ rotation about the $\hat{Z}_b$ axis between each sequential motor module. 
 \par
+Motors $1$ and $3$ have clockwise propeller rotations $\Omega_{1},\Omega_{3}>0$, whereas motors $2$ and $4$ have anti-clockwise propeller rotations $\Omega_{2},\Omega_{4}<0$. An instantaneous configuration of the multibody system is fully described by the four propeller's rotational speed and the eight additional actuator rotational positions.
+\\
 That actuator configuration input matrix $u$, within the saturation limited actuator subset $\mathbb{U}$, is such that:
 \begin{equation}\label{eq:actautor-matrix}
 \underset{\in\mathbb{U}}{u}\triangleq\begin{bmatrix}
 \Omega_1 & \lambda_1 & \alpha_1 & \ldots & -\Omega_4 & \lambda_4 & \alpha_4
 \end{bmatrix}^T~~\in\mathbb{R}^{12}
 \end{equation}
-A propeller's generated thrust or torque, (\ref{eq:bem-thrust}) and (\ref{eq:bem-torque}) respectively, has the body frame vector counterpart:
+A propeller's generated thrust or torque, (\ref{eq:bem-thrust}) and (\ref{eq:bem-torque}) respectively, has the body frame vectored counterpart for:
 \begin{subequations}
 \begin{equation}\label{eq:force-redirect}
-\vec{T}_{1\rightarrow 4} = Q_{M_i}^*\otimes\vec{T}(\Omega_i)\otimes Q_{M_i}~~[\text{N}],~\in\mathcal{F}^{b}
+\vec{T}_{i} = Q_{M_i}^*\otimes\vec{T}(\Omega_i)\otimes Q_{M_i}~~~~\in\mathcal{F}^{b}
 \end{equation}
-\vspace{-16pt}
+\vspace{-14pt}
 \begin{equation}\label{eq:torque-redirect}
-\vec{Q}_{1\rightarrow 4} = Q_{M_i}^*\otimes\vec{Q}(\Omega_i)\otimes Q_{M_i}~~[\text{Nm}],~\in\mathcal{F}^{b}
+\vec{H}_{i} = Q_{M_i}^*\otimes\vec{H}(\Omega_i)\otimes Q_{M_i}~~~~\in\mathcal{F}^{b}
 \end{equation}
 Where each $Q_{M_i}$ is the relative quaternion from the motor module's frame $\mathcal{F}^{M_i}$ to the body frame $\mathcal{F}^{b}$ such that:
 \begin{equation}
 Q_{M_i}\triangleq Q_z(\sigma_i)\otimes Q_y(\alpha_i) \otimes Q_x(\lambda_i)
 \end{equation}
 \end{subequations}
-With $Q_z,Q_y$ and $Q_x$ being quaternion rotations about each $\hat{Z},\hat{Y}$ and $\hat{X}$ axes respectively. Note that $\sigma_i$ is the $\hat{Z}_b$ orthogonal angular rotation between each motor module; detailed in the layout of Fig:\ref{fig:body-frame}. The net heave and control torque acting on the body due to actuation action is simply:
+With $Q_z,Q_y$ and $Q_x$ being quaternion rotations about each $\hat{Z},\hat{Y}$ and $\hat{X}$ axes respectively. Note that $\sigma_i$ is the $\hat{Z}_b$ orthogonal angular rotation between each motor module; detailed in the layout of Fig:\ref{fig:body-frame}. The net heave and control torque acting on the body due to actuation action are simply:
 \begin{subequations}\label{eq:net-inputs}
 \begin{equation}\label{eq:net-force}
-\vec{F}_{\mu}=\sum_{i=1}^{4}\vec{T}(\Omega_i,\lambda_i,\alpha_i)~~~~[\text{N}]
+\vec{F}_{\mu}=\sum_{i=1}^{4}\vec{T}_i(\Omega_i,\lambda_i,\alpha_i)~~~~\in\mathcal{F}^b
 \end{equation}\vspace{-10pt}
 \begin{equation}\label{eq:net-torque}
-\vec{\tau}_{\mu}=\sum_{i=1}^4\vec{L}_{i}\times\vec{T}(\Omega_i,\lambda_i,\alpha_i)+\vec{\tau}_Q(\Omega_i,\lambda_i,\alpha_i)~~~~[\text{Nm}]
+\vec{\tau}_{\mu}=\sum_{i=1}^4\vec{L}_{i}\times\vec{T}_i(\Omega_i,\lambda_i,\alpha_i)+\vec{H}_i(\Omega_i,\lambda_i,\alpha_i)~~~~\in\mathcal{F}^b
 \end{equation}
 \end{subequations}
-Each thrust vector $\vec{T}(\Omega_i,\lambda_i,\alpha_i)\in\mathcal{F}^b$ is a combined function of (\ref{eq:bem-thrust}) and (\ref{eq:force-redirect}). The net torque $\vec{\tau}_\mu\in\mathcal{F}^b$ comprises of differential torque arm cross-products from input thrusts $\vec{T}_{1\rightarrow 4}$ each acting at a length $\vec{L}$ in Fig:\ref{fig:body-frame} \emph{and} the propeller's aerodynamic torque, $\vec{\tau}_Q(\Omega_i,\lambda_i,\alpha_i)$, as a combined function of (\ref{eq:bem-torque}) and (\ref{eq:torque-redirect}). The latter aerodynamic torque $\sum\vec{\tau}_Q(\Omega_i,\lambda_i,\alpha_i)$ is a term to be \emph{compensated} for in feedback, not used as a controllable input.
+Each thrust vector $\vec{T}_i(\Omega_i,\lambda_i,\alpha_i)$ is a combined function of produced thrust (\ref{eq:bem-thrust}), redirected by (\ref{eq:force-redirect}). The net torque $\vec{\tau}_\mu$ comprises of differential torque arm cross-products of input thrusts $\vec{T}_i$, each acting at a length $\vec{L}_i$ in Fig:\ref{fig:body-frame}, and the propeller's aerodynamic torque $\vec{H}_i(\Omega_i,\lambda_i,\alpha_i)$ being a similar combined function of (\ref{eq:bem-torque}) and (\ref{eq:torque-redirect}). Aerodynamic drag $\vec{\tau}_H\triangleq\sum\vec{H}_i(\Omega_i,\lambda_i,\alpha_i)$ is to be \emph{compensated} for in feedback, but could otherwise be used as a controllable input.
 \par
 \begin{figure}[bp]
 \vspace{-15pt}
@@ -130,94 +134,95 @@ Each thrust vector $\vec{T}(\Omega_i,\lambda_i,\alpha_i)\in\mathcal{F}^b$ is a c
 \section{Dynamics}
 \label{sec:dynamics}
 %=========================================================
-The typical Lagrangian dynamics for a \emph{rigid} 6-DOF body are as follows; derived from first principles in\cite{dualaxistilting}. For a rigid body with an angular velocity $\vec{\omega}_b$ in $\mathcal{F}^b$ and an inertial matrix $J_b$ aligned with axes in $\mathcal{F}^b$; the quaternion dynamics for the attitude's differential equations of motion are:
+For a \emph{rigid} 6-DOF body, the Lagrangian dynamics of which are derived from first principles in\cite{dualaxistilting}, having an angular velocity $\vec{\omega}_b$ in $\mathcal{F}^b$ and an inertial matrix $J_b$ aligned with axes in $\mathcal{F}^b$; the quaternion dynamics, \cite{rotation}, for the attitude's differential equations of motion are:
 \begin{subequations}\label{eq:attitude-dynamics}
 \begin{equation}\label{eq:quaternion-deriv}
-\dot{Q}_b=1/2\big(Q_b\otimes\vec{\omega}_b\big)~~\in\mathcal{F}^I
+\dot{Q}_b=1/2\big(Q_b\otimes\vec{\omega}_b\big)~~~~\in\mathcal{F}^I
 \end{equation}
-\vspace{-16pt}
+\vspace{-14pt}
 \begin{equation}\label{eq:attitude-dynamics.b}
-\dot{\vec{\omega}}_b= J_b^{-1}\big(-\vec{\omega}_b\times J_b\vec{\omega}_b+\vec{\tau}_\mu\big)~~[\text{rad.s}^{-2}],~\in\mathcal{F}^{b}
+\dot{\vec{\omega}}_b= J_b^{-1}\big(-\vec{\omega}_b\times J_b\vec{\omega}_b+\vec{\tau}_\mu\big)~~~~\in\mathcal{F}^{b}
 \end{equation}
 \end{subequations}
-For a net torque control input $\vec{\tau}_\mu\in\mathcal{F}^b$. Similarly the vehicle's translational dynamics, for an iniertial position $\vec{\mathcal{E}}\in\mathcal{F}^{I}$ and a translational velocity $\vec{v}_b\in\mathcal{F}^b$ and a net input force $\vec{F}_\mu\in\mathcal{F}^b$:
+With a net torque control input $\vec{\tau}_\mu\in\mathcal{F}^b$. Similarly the vehicle's translational dynamics, for an inertial position $\vec{\mathcal{E}}\in\mathcal{F}^{I}$ and a translational velocity $\vec{v}_b\in\mathcal{F}^b$ with a net input force $\vec{F}_\mu\in\mathcal{F}^b$:
 \begin{subequations}\label{eq:position-dynamics}
 \begin{equation}
-\dot{\vec{\mathcal{E}}}=Q_b^*\otimes\vec{v}_b\otimes Q_b~~[\text{m.s}^{-1}],~\in\mathcal{F}^{I}
+\dot{\vec{\mathcal{E}}}=Q_b^*\otimes\vec{v}_b\otimes Q_b~~~~\in\mathcal{F}^{I}
 \end{equation}
-\vspace{-16pt}
+\vspace{-14pt}
 \begin{equation}\label{eq:postion-dynamics.b}
-\dot{\vec{v}}_b=m_b^{-1}\big(-\vec{\omega}_b\times\vec{v}_b+m_b\vec{G}_b+\vec{F}_\mu\big)~~[\text{m.s}^{-2}],~\in\mathcal{F}^{b}
+\dot{\vec{v}}_b=m_b^{-1}\big(-\vec{\omega}_b\times\vec{v}_b+m_b\vec{G}_b+\vec{F}_\mu\big)~~~~\in\mathcal{F}^{b}
 \end{equation}
 \end{subequations}
-For a mass $m_b$ and a gravitational acceleration $\vec{G}_b$ transformed to the body frame. Particulars associated with the multibody dynamics resulting from the system's actuation were additively introduced to the above equations of motion (\ref{eq:attitude-dynamics}) and (\ref{eq:position-dynamics}). Furthermore, explicit calculation of the instantaenous net inertial matrix is not a constant $J_b$ but a function the acutator matrix (\ref{eq:actautor-matrix}); $J_b(u)$. The complete multibody dynamics for the design are presented in \cite{dualaxistilting}, from which this paper is adapted, but are excluded here for the sake of brevity. In summary; each of the 13 independent bodies are revolutely connected with only one permissible degree of rotational freedom between each sequential structure. Fig:\ref{fig:response-body} shows the exploded components of a single motor module; each with their own rotational velocity relative to $\mathcal{F}^b$, resulting from the actuation rates $\dot{\lambda_i}$ and $\dot{\alpha_i}$. The non-Newtonian frames for each rotating sub-body made quantifying the net multi-body's response to rotational and translational motion highly complicated. A complete Lagrangian, \cite{lagrange}, was constructed for each body's net kinetic and potential energies. As per Lagrangian dynamics, the partial derivatives with respect to the Lagrangian's path co-ordinates results in the \emph{generalized forces}, in this case torques $\vec{\tau}_b$, acting on the system. 
+With a mass $m_b$ and a gravitational acceleration $\vec{G}_b$ transformed to the body frame. Particulars associated with the multibody dynamics resulting from the system's actuation were added to the above equations of motion (\ref{eq:attitude-dynamics}) and (\ref{eq:position-dynamics}). Furthermore, explicit calculation of the instantaenous net inertial matrix is not a constant $J_b$ but a function the acutator matrix (\ref{eq:actautor-matrix}); $J_b(u)$. The complete multibody dynamics for the design are presented in \cite{dualaxistilting}, from which this paper is adapted, but are excluded here for the sake of brevity. 
+\par
+In summary; each of the thirsteen independent bodies are connected with only one permissible degree of rotational freedom between each sequential structure. Fig:\ref{fig:response-body} shows the exploded view of a single motor module; each with its own rotational velocity relative to $\mathcal{F}^b$, resulting from the actuation rates $\dot{\lambda_i}$ and $\dot{\alpha_i}$. Non-Newtonian frames of each rotating sub-body made quantifying the net multi-body's response to rotational and translational motion highly complicated. As per \cite{lagrange}, partial derivatives of the multibody's Lagrangian with respect to each actuator's path co-ordinates produces the \emph{generalized forces}, in this case torques $\vec{\tau}_b$, acting on the system as a response to actuation input.
 \begin{figure}[bp]
 \vspace{-15pt}
 \centering
 \includegraphics[width=0.5\textwidth]{figs/response-body}
-\vspace{-22pt}
+\vspace{-20pt}
 \caption{Multi-body overview}
 \label{fig:response-body}
 \vspace{-3pt}
 \end{figure}
 \newpage
-Each motor module contributes some non-zero inertial derivative towards the dynamic response calculations, complicating their solutions. If a body has an inertia $J$ in it's principle frame, but the body is rotated by $\theta$ about some unit axis $\hat{u}$. The effective transformed inertia is:
+Each motor module contributes some non-zero inertial derivative towards the dynamic response calculations, complicating their solutions. If a body has an inertia $J$ in its principle frame, but the body is rotated by $\theta$ about some unit axis $\hat{n}$. The effective transformed inertia is:
 \begin{subequations}
 \begin{equation}\label{eq:inertia}
-J'=R_{\hat{u}}(\theta)\big(J\big)R_{\hat{u}}^{-1}(\theta)
+J'=R_{\hat{n}}(\theta)\big(J\big)R_{\hat{n}}^{-1}(\theta)
 \end{equation}
-Where $R_{\hat{u}}(\theta)$ is the rotation matrix about that unit axis, \cite{rotation}. Quaternions are ill suited for inertial transformations; hence the use of rotation matrices here. If $\theta$ is a time varying angular rotation then (\ref{eq:inertia}) has a time derivative 
+Where $R_{\hat{n}}(\theta)$ is the rotation matrix about that unit axis, \cite{rotation}. Quaternions are ill-suited for inertial transformations; hence the use of rotation matrices here. If $\theta$ is a time varying angular rotation then (\ref{eq:inertia}) has a time derivative 
 \begin{equation}
-\dot{J}'=d/dt\Big(R_{\hat{u}}(\theta)\big(J\big)R_{\hat{u}}^{-1}\Big)
+\dot{J}'=d/dt\Big(R_{\hat{n}}(\theta)\big(J\big)R_{\hat{n}}^{-1}\Big)
 \end{equation}
 \vspace{-18pt}
 \begin{multline}\label{eq:inertia-rate}
-=[\dot{\vec{\theta}}\hspace{2pt}]_\times R_{\hat{u}}(\theta)\big(J\big)R_{\hat{u}}^{-1}(\theta)+R_{\hat{u}}(\theta)\big(\dot{J}\big)R_{\hat{u}}(\theta)
+=[\dot{\vec{\theta}}\hspace{2pt}]_\times R_{\hat{n}}(\theta)\big(J\big)R_{\hat{n}}^{-1}(\theta)+R_{\hat{n}}(\theta)\big(\dot{J}\big)R_{\hat{n}}(\theta)
 \\
--R_{\hat{u}}(\theta)\big(J\big)[\dot{\vec{\theta}}\hspace{2pt}]_\times R_{\hat{u}}^{-1}(\theta)
+-R_{\hat{n}}(\theta)\big(J\big)[\dot{\vec{\theta}}\hspace{2pt}]_\times R_{\hat{n}}^{-1}(\theta)
 \end{multline}
-Where $\vec{\theta}$ is the projected vector of $\theta$ in the direction of it's unit axis $\hat{u}$, or that $\vec{\theta}\triangleq\theta\cdot\hat{u}$. Then $\dot{J}$ is the inertia's time derivative (if any) in it's principle frame. Finally $[.]_{\times}$ is such that a two vector cross product $\vec{a}\times\vec{b}$, is applied as a matrix multiplication:
+Where $\vec{\theta}$ is the projected vector of $\theta$ in the direction of its unit axis $\hat{n}$, or that $\vec{\theta}\triangleq\theta\cdot\hat{n}$. Then $\dot{J}$ is the inertia's time derivative (if any) in its principle frame. Finally $[.]_{\times}$ is such that a two vector cross product $\vec{a}\times\vec{b}$, is applied as a matrix multiplication:
 \begin{equation}
-\vec{a}\times\vec{b}\equiv [\vec{a}\hspace{2pt}]_{\times}\vec{b}
+\vec{a}\times\vec{b}\equiv [\vec{a}\hspace{2pt}]_\times \vec{b}\triangleq \begin{bmatrix}
+0 & -a_3 & a_2\\
+a_3 & 0 & -a_1\\
+-a_2 & a_1 & 0
+\end{bmatrix}\vec{b}
 \end{equation}
 \end{subequations}
-A body's \emph{generalized force} (torque) response to an applied angular velocity/acceleration consists of three components; an inertial rate component, an inertial response to the applied acceleration and a gyroscopic cross-product of the relative angular velocities. Those net responses are lumped into an additive toque term $\hat{\tau}_b(u)$ which, like the body's net rotational inertia, is a function of the actuator configuration $u\in\mathbb{U}$. The multibody response derivation is, however, far too cumbersome to include here and so is omitted for conciseness. The angular differential equation, (\ref{eq:attitude-dynamics}), then treats the net aerodynamic torque $\vec{\tau}_Q$ from (\ref{eq:net-torque}) and the multibody non-linearity responses $\hat{\tau}_b(u)$ as terms to be compensated for:
-\begin{subequations}
+A body's \emph{generalized force} (torque) response to an applied angular velocity/acceleration consists of three components; an inertial rate component, an inertial response to the applied acceleration and a gyroscopic cross-product of the relative angular velocities. Those net responses are lumped into an additive toque term $\vec{\tau}_b(u)$ which, like the body's net rotational inertia, is a function of the actuator configuration $u\in\mathbb{U}$. The multibody response derivation is, however, far too cumbersome to include here. Equation (\ref{eq:attitude-dynamics.b}) for angular acceleration treats the net aerodynamic torque $\vec{\tau}_H$ from (\ref{eq:net-torque}) and the multibody non-linearity responses $\vec{\tau}_b(u)$ as terms to be compensated for in feedback:
 \begin{multline}\label{eq:angular-diff}
-\therefore \dot{\vec{\omega}}_b = J_b(u)^{-1}\big(-\vec{\omega}_b\times J_b(u) \vec{\omega}_b-\hat{\tau}_b(u)
+\therefore \dot{\vec{\omega}}_b = J_b(\hat{u})^{-1}\big(-\vec{\omega}_b\times J_b(\hat{u}) \vec{\omega}_b-\vec{\tau}_b(\hat{u})
 \\
-+\vec{\tau}_Q+\vec{\tau}_g+\vec{\tau}_\mu \big)
++\vec{\tau}_H+\vec{\tau}_g+\vec{\tau}_\mu \big)
 \end{multline}
-Lastly, the torque $\vec{\tau}_g$ is from the eccentric center of gravity produced by rotated motor modules. The net center of gravity is $C.M_b(u)$ and so the gravity torque is a cross-product of it's deviation from the body frame's origin $\vec{\mathbf{O}}_b$ and the gravitational force on the body:
-\begin{equation}
-\vec{\tau}_g=\big(\vec{\mathbf{O}}_b-C.M_b(u)\big)\times m_b\vec{G}_b
-\end{equation}
-\end{subequations}
+State estimates $\hat{u}$ for actuator positions are used in (\ref{eq:angular-diff}) to incorporate transfer functions of each individual actuator. Lastly, $\vec{\tau}_g$ is a gravity torque term caused by any disparity in the \emph{rotated} motor modules' gravitational centroids.
 %=========================================================
 \section{Controller Design}
 \label{sec:control}
 %=========================================================
-The control block is divided into two components; a higher level setpoint tracking controller designs a virtual control inputs $\vec{\nu}_d=[\vec{F}_d ~ \vec{\tau}_d]^T\in\mathcal{F}^{b}$ for (\ref{eq:postion-dynamics.b}) and (\ref{eq:attitude-dynamics.b}). Thereafter an allocation rule solves for an explicit actuator positions $u\in\mathbb{U}$ which physically command that control input, $\vec{\nu}_c$ as per the actuators \emph{effectiveness} function. The effectiveness function or $B(\vec{\mathbf{x}},t,u)=[\vec{F}_c~\vec{\tau}_c]^T=\vec{\nu}_c$, for collective attitude and position states $\vec{\mathbf{x}}=[\vec{\mathcal{E}} ~ Q_b]^T$, is a combination of thrust and torque inputs (\ref{eq:net-force}) and (\ref{eq:net-torque}) and their aerodynamics (\ref{eq:bem-thrust}-\ref{eq:bem-torque}).
+The control block is divided into two components; a higher level setpoint tracking controller which designs a virtual control inputs $\vec{\nu}_d=[\vec{F}_d ~ \vec{\tau}_d]^T\in\mathcal{F}^{b}$ for (\ref{eq:postion-dynamics.b}) and (\ref{eq:attitude-dynamics.b}). Thereafter an allocation rule solves for explicit actuator positions $u\in\mathbb{U}$ which physically command the control input $\vec{\nu}_c$ as per the actuator's \emph{effectiveness} function. The effectiveness function or $B(\vec{\mathbf{x}},t,u)=[\vec{F}_c~\vec{\tau}_c]^T=\vec{\nu}_c$, for collective attitude and position states $\vec{\mathbf{x}}=[\vec{\mathcal{E}} ~ Q_b]^T$, is a combination of thrust and torque inputs (\ref{eq:net-force}-\ref{eq:net-torque}) and their aerodynamics (\ref{eq:bem-thrust}-\ref{eq:bem-torque}).
 \par
-Only first order setpoint tracking is applied here to follow a state  setpoint $\vec{\mathbf{x}}_d=[\vec{\mathcal{E}}_d ~ Q_d]^T$. Higher order (velocity/acceleration) state derivative setpoints are then $\dot{\vec{\mathbf{x}}}_d=[\dot{\vec{\mathcal{E}}}_d ~ \dot{Q}_d]^T=\vec{0}$. The control problem of setpoint tracking for an error state $\vec{\mathbf{x}}_e$ is to find a control law $\vec{\nu}_d=H(\vec{\mathbf{x}}_e,t)$ such that the error is asymptotically stabilized; $\lim_{t\rightarrow\infty}\vec{\mathbf{x}}_e\rightarrow\vec{0}$.
+Only first order setpoints are commanded such that the state's setpoint is $\vec{\mathbf{x}}_d=[\vec{\mathcal{E}}_d ~ Q_d]^T$. Higher order (velocity/acceleration) state derivative setpoints are then $\dot{\vec{\mathbf{x}}}_d=[\dot{\vec{\mathcal{E}}}_d ~ \dot{Q}_d]^T=\vec{0}$. The control problem of setpoint tracking for an error state $\vec{\mathbf{x}}_e$ is to find a control law $\vec{\nu}_d=H(\vec{\mathbf{x}}_e,t)$ such that the error is asymptotically stabilized; $\lim_{t\rightarrow\infty}\vec{\mathbf{x}}_e\rightarrow\vec{0}$. Basic Proportional-Derivative (\emph{PD}) controllers are used here, because of their simplicity and efficient optimzation; \cite{dualaxistilting}.
 %=========================================================
 \subsection{Attitude Control Derivation}
 %=========================================================
-The attitude plant, (\ref{eq:attitude-dynamics}) and extended to (\ref{eq:angular-diff}), is stabilized first because of it's independence from the position control loop. For a quaternion setpoint $Q_d$, the quaternion error is a \emph{multiplicative} term defined as:
+The attitude plant, (\ref{eq:attitude-dynamics}) and extended to (\ref{eq:angular-diff}), is stabilized first because of its independence from the position control loop. For a quaternion setpoint $Q_d$ the quaternion error, \cite{rotation}, is a \emph{multiplicative} term defined as:
 \begin{subequations}
 \begin{equation}\label{eq:quat-error}
 Q_e \triangleq Q_b^* \otimes Q_d
 \end{equation}
-An angular velocity setpoint is defined with respect to the attitude setpoint's frame, or that $\vec{\omega}_d\in\mathcal{F}^d$. The subtractive angular velocity error $\vec{\omega}_e$ transforms that setpoint $\vec{\omega}_d$ back to $\mathcal{F}^b$:
+An angular velocity setpoint is defined with respect to the attitude setpoint's frame, or that $\vec{\omega}_d\in\mathcal{F}^d$. The angular velocity error $\vec{\omega}_e$ transforms that setpoint $\vec{\omega}_d$ back to $\mathcal{F}^b$:
 \begin{equation}\label{eq:angular-error}
 \vec{\omega}_e \triangleq Q_e\otimes \vec{\omega}_d\otimes Q_e^* - \vec{\omega}_b=-\vec{\omega}_b\Big|_{\vec{\omega}_d=\vec{0}}~~\in\mathcal{F}^{b}
 \end{equation}
 \end{subequations}
-Proposing a plant dependent Proportional-Derivative (\emph{PD}) attitude controller with compensation feedback terms. The PD controller designs an input torque $\vec{\tau}_d\in\mathcal{F}^b$ using the angular velocity error $\vec{\omega}_e$ and the \emph{vector} quaternion error $\vec{q}_e$:
+Proposing a plant dependent PD attitude controller with compensation feedback terms. That PD controller designs an input torque $\vec{\tau}_d\in\mathcal{F}^b$ using the angular velocity error $\vec{\omega}_e$ and the \emph{vector} quaternion error $\vec{q}_e$:
 \begin{equation}\label{eq:attitude-pd}
 \vec{\tau}_d=\underbrace{K_p\vec{q}_e+K_d\vec{\omega}_e}_{independent}+\underbrace{\vec{\omega}_b\times J_b(u)+\hat{\tau}_b(u)-\vec{\tau}_Q-\vec{\tau}_g}_{compensation}
 \end{equation}
-Where $K_p$ and $K_d$ are both positive diagonal $3\times 3$ gain coefficient matrices. A controller's stability throughout it's general trajectory is proven through Lyapunov stability thoerem, \cite{bojelyapunov}. A Lyapunov function candidate (\emph{LFC}) for the attitude's trajectory \emph{error} such that $V_1(\vec{0}\hspace{2pt})=0$ is:
+Where $K_p$ and $K_d$ are both positive diagonal $3\times 3$ gain coefficient matrices. A controller's stability throughout its general trajectory is proven through Lyapunov stability thoerem, \cite{bojelyapunov}. A Lyapunov function candidate (\emph{LFC}) for the attitude's trajectory \emph{error} such that $V_1(\vec{0}\hspace{2pt})=0$ is:
 \begin{subequations}\label{eq:14}
 \begin{multline}\label{eq:14a}
 V_1(Q_e,\vec{\omega}_e)=\vec{q}_e^{~T}\vec{q}_e+(1-|q_0|)^2
@@ -259,7 +264,7 @@ The LFC derivative (\ref{eq:14e}) is negative definite for $\forall(Q_e,\vec{\om
 %=========================================================
 \subsection{Position Control Derivation}
 %=========================================================
-Position setpoints $\vec{\mathcal{E}}_d$  are defined in $\mathcal{F}^I$, whereas body translational velocity $\vec{v}_b$ is in $\mathcal{F}^b$. Translational position error is:
+Position setpoints $\vec{\mathcal{E}}_d$  are defined in $\mathcal{F}^I$, whereas the body's translational velocity $\vec{v}_b$ is in $\mathcal{F}^b$. The translational position error is then defined as:
 \begin{subequations}
 \begin{equation}
 \vec{\mathcal{E}}_e\triangleq\vec{\mathcal{E}}_d-\vec{\mathcal{E}}_b~~\in\mathcal{F}^I
@@ -274,11 +279,11 @@ A PD position controller designs a control force from the position and velocity 
 \begin{equation}
 \vec{X}_b\triangleq Q_b\otimes \vec{\mathcal{E}}_b \otimes Q_b^*~~\in\mathcal{F}^b
 \end{equation}
-\vspace{-14pt}
+\vspace{-12pt}
 \begin{equation}\label{eq:17b}
 \therefore \vec{X}_e=\vec{X}_d-\vec{X}_b=Q_b\otimes\big(\vec{\mathcal{E}}_d-\vec{\mathcal{E}}_b\big)\otimes Q_b^*
 \end{equation}
-\vspace{-14pt}
+\vspace{-12pt}
 \begin{equation}\label{eq:17c}
 \rightarrow \dot{\vec{X}}_e=Q_b\otimes\big(\dot{\vec{\mathcal{E}}}_d-\dot{\vec{\mathcal{E}}}_b\big)\otimes Q_b^*=-\vec{v}_b\big|_{\dot{\vec{\mathcal{E}}}_d=\vec{0}}
 \end{equation}
@@ -287,7 +292,7 @@ Note that (\ref{eq:17b}) holds true because of a quaternion multiplciation's ass
 \begin{equation}\label{eq:position-pd}
 \vec{F}_d=\underbrace{A_p\vec{X}_e+A_d\vec{v}_e}_{independent}+\underbrace{\vec{\omega}_b\times m_b\vec{v}_b-m_b\vec{G}_b}_{compensation}
 \end{equation}
-With posisitive diagonal $3\times 3$ gain coefficients $A_p$ and $A_d$. The Coriolis acceleration component of (\ref{eq:position-pd}), $\vec{\omega}_b\times m_b\vec{v}_b$, and the transformation of $\vec{\mathcal{E}}_e\in\mathcal{F}^{b}$ to $\vec{X}_e\in\mathcal{F}^b$ are the reasons that attitude must be stabilized before position control can be applied. Again, using an LFC to prove the stability of (\ref{eq:position-pd}):
+With posisitive diagonal $3\times 3$ gain coefficients $A_p$ and $A_d$. The Coriolis acceleration component of (\ref{eq:position-pd}), $\vec{\omega}_b\times m_b\vec{v}_b$, and the transformation of $\vec{\mathcal{E}}_e\in\mathcal{F}^{b}$ to $\vec{X}_e\in\mathcal{F}^b$ are both reasons that attitude must be stabilized before position control can be applied. Again, using an LFC to prove the stability of (\ref{eq:position-pd}):
 \begin{subequations}\label{eq:19}
 \begin{equation}
 V_2(\vec{X}_e,\vec{v}_e)=\frac{1}{2}\vec{X}_e^{~T}A_p\vec{X}_e+\frac{1}{2}\dot{\vec{X}}_e^{~T}m_b\dot{\vec{X}}_e
@@ -314,18 +319,18 @@ The asymptotic stability asserted (\ref{eq:19e}) holds for $\forall(\vec{\mathca
 \begin{equation}
 \lim_{t\rightarrow\infty}\vec{X}_e=\vec{0}\therefore \lim_{t\rightarrow\infty}\vec{\mathcal{E}}_b=\vec{\mathcal{E}}_d
 \end{equation}
-\vspace{-14pt}
+\vspace{-10pt}
 \begin{equation}
 \lim_{t\rightarrow\infty}\dot{\vec{X}}_e=-\vec{v}_b=\vec{0}\big|_{\dot{\vec{\mathcal{E}}}_d=\vec{0}}
 \end{equation}
 \end{subequations}
 \subsection{Control Allocation}
-Lastly values for the 12 actuators in (\ref{eq:actautor-matrix}) need to be found from the virtual control input(s), (\ref{eq:attitude-pd}) and (\ref{eq:position-pd}). Control allocation is explanined in \cite{allocation}; so the details of the minimization problem are not considered here. If $\vec{\nu}_c$ is the commanded input counterpart of the virtual control input $\vec{\nu}_d$, the two are related by the allocator's effectiveness matrix $B(\vec{\mathbf{x}},u,t)$:
+Values for the twelve actuators in (\ref{eq:actautor-matrix}) need to be found from the virtual control input(s), (\ref{eq:attitude-pd}) and (\ref{eq:position-pd}). Control allocation is explained in \cite{allocation}; so the details of the minimization problem are not considered here. If $\vec{\nu}_c$ is the commanded input counterpart of the virtual control input $\vec{\nu}_d$, the two are related by the allocator's \emph{effectiveness} matrix $B(\vec{\mathbf{x}},u,t)$:
 \begin{equation}
 \vec{\nu}_d=H(\vec{\mathbf{x}}_e,t)\iff B(\vec{\mathbf{x}},t,u)=\vec{\nu}_c
 \end{equation}
 \newpage
-Typical pseudo-inversion, as applied here, requires an \emph{affine} relationship between the effectiveness function and the input matrix; $B(\vec{\mathbf{x}},t,u)\equiv B'(\vec{\mathbf{x}},t)u$. The combination of net inputs in (\ref{eq:net-inputs}) and aerodynamics in (\ref{eq:bem}) are not easily reduced to a multiplicative relationship as needed. An abstraction is then used such that an allocation rule finds four 3-dimensional thrust vectors $\vec{T}_{1\rightarrow 4}\in\mathcal{F}^b$ to then be actuated by each motor module (Fig:\ref{fig:force-redirect}). From (\ref{eq:net-inputs}), \emph{without} the net aerodynamic torque, the commanded input $\vec{\nu}_c$ is the a function of $\vec{T}_{1\rightarrow 4}$:
+Typical pseudo-inversion, as applied here, requires an \emph{affine} relationship between the effectiveness function and the input matrix; $B(\vec{\mathbf{x}},t,u)\equiv B'(\vec{\mathbf{x}},t)u$. The combination of net inputs in (\ref{eq:net-inputs}) and aerodynamics in (\ref{eq:bem}) are not easily reduced to a multiplicative relationship as needed. An abstraction is then used such that an allocation rule finds four 3-dimensional thrust vectors $\vec{T}_{1\rightarrow 4}\in\mathcal{F}^b$ to then be actuated by each motor module (Fig:\ref{fig:force-redirect}). From (\ref{eq:net-inputs}), \emph{without} the net aerodynamic torque, the commanded input $\vec{\nu}_c$ is the a function of four thrust vectors $\vec{T}_{1\rightarrow 4}$:
 \begin{subequations}\label{eq:effectiveness}
 \begin{equation}
 \vec{\nu}_c = \begin{bmatrix}
@@ -348,7 +353,7 @@ Typical pseudo-inversion, as applied here, requires an \emph{affine} relationshi
 \end{bmatrix}
 \end{equation}
 \end{subequations}
-Then, using the pseudo-inversion of (\ref{eq:effectiveness}), the 4 thrust vectors are found from the controller designed inputs $\vec{\nu}_d=[\vec{F}_d~\vec{\tau}_d]^T$:
+Then, using the pseudo-inversion of (\ref{eq:effectiveness}), the thrust vectors are found from the controller designed inputs $\vec{\nu}_d=[\vec{F}_d~\vec{\tau}_d]^T$:
 \begin{subequations}\label{eq:pseudo-inversion}
 \begin{equation}
 \vec{T}_{1\rightarrow 4} = B'^{T}(\vec{\mathbf{x}},t)\big(B'(\vec{\mathbf{x}},t)B'^T(\vec{\mathbf{x}},t)\big)^{-1}\vec{\nu}_d
@@ -358,7 +363,7 @@ Then, using the pseudo-inversion of (\ref{eq:effectiveness}), the 4 thrust vecto
 \rightarrow \vec{T}_{1\rightarrow 4} = B^\ddagger (\vec{\mathbf{x}},t)\vec{\nu}_d
 \end{equation}
 \end{subequations}
-Each of the four thrust vectors are used to find a corresponding motor module propeller's rotational speed $\Omega_i$ and both actuator rotational positions $\lambda_i$ and $\alpha_i$. A trigonometric inversion ``unwinds'' the rotations applied to the produced the thrust vector from (\ref{eq:force-redirect}). Here \emph{rotation matrices} are used in lieu of quaternions for (\ref{eq:force-redirect}) to solve $\lambda_i$ and $\alpha_i$:
+Each of the four thrust vectors are used to find a corresponding motor module propeller's rotational speed $\Omega_i$ and both actuator rotational positions $\lambda_i$ and $\alpha_i$. A trigonometric inversion ``unwinds'' the rotations applied to the produced the thrust vector from (\ref{eq:force-redirect}). Here rotation matrices are used in lieu of quaternions for (\ref{eq:force-redirect}) to solve $\lambda_i$ and $\alpha_i$:
 \begin{subequations}
 \begin{equation}\label{eq:thrust-inversion.a}
 \vec{T}_i=R_{M_i}(\sigma_i,\alpha_i,\lambda_i)\vec{T}(\Omega_i)
@@ -367,7 +372,7 @@ Each of the four thrust vectors are used to find a corresponding motor module pr
 \begin{equation}\label{eq:thrust-inversion.b}
 =R_z(\sigma_i)R_y(\alpha_i)R_x(\lambda_i)\vec{T}(\Omega_i)\in\mathcal{F}^{b}
 \end{equation}
-The propeller's thrust vector $\vec{T}(\vec{\Omega}_i)$ is entirely in the $\hat{Z}_{M_i}$ direction. That (\ref{eq:thrust-inversion.b}) simplifies for the $i^{\text{th}}$ motor module with an orthogonal $\sigma_i$ rotation about the $\hat{Z}_b$ axis:
+The propeller's thrust vector $\vec{T}(\Omega_i)$ is entirely in the $\hat{Z}_{M_i}$ direction. Then (\ref{eq:thrust-inversion.b}) simplifies for the $i^{\text{th}}$ motor module with an orthogonal $\sigma_i$ rotation about the $\hat{Z}_b$ axis:
 \begin{equation}\label{eq:thrust-inversion.c}
 \rightarrow \begin{bmatrix}
 T_x\\
@@ -380,7 +385,7 @@ c\alpha_i c\lambda_i
 \end{bmatrix}T(\Omega_i)
 \end{equation}
 \end{subequations}
-Then inverse trigonometry can be used to solve for each actuator angle in (\ref{eq:thrust-inversion.c}). Because $\sigma_{1\rightarrow 4}\in[0\text{\textdegree},90\text{\textdegree},180\text{\textdegree},270\text{\textdegree}]$ inversion equations for each motor module will be different. First, the thrust vector's magnitude $|\vec{T}_i|$ are used to solve for the propeller's speed $\Omega_i$ from (\ref{eq:bem-thrust}). Then for reference; the $1^{\text{st}}$ motor module's thrust inversion equation (when $\sigma_1=0\text{\textdegree}$) is as follows:
+Inverse trigonometry can be used to solve for each actuator angle in (\ref{eq:thrust-inversion.c}). Because $\sigma_{1\rightarrow 4}\in[0\text{\textdegree},90\text{\textdegree},180\text{\textdegree},270\text{\textdegree}]$ inversion equations for each motor module will be different. First, the thrust vector's magnitude $|\vec{T}_i|$ are used to solve for the propeller's speed $\Omega_i$ from (\ref{eq:bem-thrust}). Then for reference; the $1^{\text{st}}$ motor module's thrust inversion equation (when $\sigma_1=0\text{\textdegree}$) is as follows:
 \begin{equation}\label{eq:thrust-inversion.d}
 \begin{bmatrix}
 \Omega_1\\
@@ -410,7 +415,7 @@ Stability for the attitude and position controllers are respectively shown in (\
 \vec{v}_{n+1}\triangleq \vec{v}_n+c_1\ast r_1\big(\vec{P}_{best}-\vec{x}_n\big)+c_2\ast r_2\big(\vec{G}_{best}-\vec{x}_n\big)
 \end{equation}
 \end{subequations} 
-Each $\ast$ operator in (\ref{eq:pso}) applies an element-by-element matrix coefficient multiplication, $\vec{P}_{best}$ and $\vec{G}_{best}$ are previous swarm positions of local and global optima. Random seeded vectors $r_1$ and $r_2$ explore the search space, biased by two weighting coefficients $c_1$ and $c_2$. The search is prejudiced toward local optima by $c_1$ whilst $c_2$ directs the swarm toward global optima. Each swarm's position is simulated over a number of set point attitude and position step tests; it's performance averaged from an ITAE cost function integrated throughout that simulation:
+Each $\ast$ operator in (\ref{eq:pso}) applies an element-by-element matrix coefficient multiplication, $\vec{P}_{best}$ and $\vec{G}_{best}$ are previous swarm positions of local and global optima. Random seeded vectors $r_1$ and $r_2$ explore the search space, biased by two weighting coefficients $c_1$ and $c_2$. The search is prejudiced toward local optima by $c_1$ whilst $c_2$ directs the swarm toward global optima. Each swarm's position is simulated over a number of set point attitude and position step tests; its performance averaged from an ITAE cost function integrated throughout that simulation:
 \begin{equation}
 \vec{\zeta}\triangleq\int_{t_0}^{t_\infty}t|\vec{e}(t)|.dt
 \end{equation}
@@ -451,7 +456,7 @@ Q_d=[-0.33~0.22~-0.26~0.88]^T\\~\text{and}~\vec{\mathcal{E}}_d=[7.5~4~3]^T
 \vspace{-18pt}
 \end{figure}
 \par
-Step responses for both attitude and position controllers are shown in Fig:\ref{fig:attitude-step}-\ref{fig:position-step} respectively. Neither controllers induced saturation of any actuator for the step and both states settled to 95\% in $t_{95}=5.62~[\text{s}]$. The objective was dynamic setpoint tracking so; to test that, an orbital trajectory was generated and commanded as a state setpoint. The trajectory orbits a central point at $0.5~[\text{Hz}]$, completing one orbit in $120~[\text{s}]$, starting from $Q_b(0)=[1~\vec{0}\hspace{2pt}]^T$ and $\vec{\mathcal{E}}_b(0)=[5~5~5]^T$. Tracking of that trajectory with an oscillating quaternion attitude and inertial position setpoints is shown in Fig:\ref{fig:attitude-trajectory}-\ref{fig:position-trajectory} respectively.
+Step responses for both attitude and position controllers are shown in Fig:\ref{fig:attitude-step}-\ref{fig:position-step} respectively. Neither controllers induced saturation of any actuator for the step and both states settled to 95\% in $t_{95}=5.62~\text{s}$. The objective was dynamic setpoint tracking so; to test that, an orbital trajectory was generated and commanded as a state setpoint. The trajectory orbits a central point at $0.5~\text{Hz}$, completing one orbit in $120~\text{s}$, starting from $Q_b(0)=[1~\vec{0}\hspace{2pt}]^T$ and $\vec{\mathcal{E}}_b(0)=[5~5~5]^T$. Tracking of that trajectory with an oscillating quaternion attitude and inertial position setpoints is shown in Fig:\ref{fig:attitude-trajectory}-\ref{fig:position-trajectory} respectively.
 %=========================================================
 \section{Conclusion}
 \label{sec:conclusion}
@@ -475,26 +480,43 @@ The non-zero setpoint tracking goal for a quadcopter's state is achieved with th
 \label{fig:position-trajectory}
 \end{figure}
 \par
-The final point of consideration is the application of a pseudo inversion control allocation in (\ref{eq:pseudo-inversion}). Such an inversion, as described in \cite{allocation}, applies a least squares optimization to it's associated actuator matrix. The physical consequence of this is that the magnitude $|\vec{T}_{1\rightarrow 4}|$ for thrust vectors to be commanded is minimized (\emph{optimized}); meaning the control algorithm prioritizes pitching those thrust vectors with $\lambda_i$ or $\alpha_i$ before changing their magnitudes with $\Omega_i$ propeller speed changes\ldots
+The final point of consideration is the application of a pseudo inversion control allocation in (\ref{eq:pseudo-inversion}). Such an inversion, as described in \cite{allocation}, applies a least squares optimization to its associated actuator matrix. The physical consequence of this is that the magnitude $|\vec{T}_{1\rightarrow 4}|$ for thrust vectors to be commanded is minimized (\emph{optimized}); meaning the control algorithm prioritizes pitching those thrust vectors with $\lambda_i$ or $\alpha_i$ before changing their magnitudes with $\Omega_i$ propeller speed changes\ldots
 %=========================================================
 \begin{thebibliography}{00}
-\bibitem{x4flyer} P. Pounds, R. Mahony, P. Hynes and J. Roberts, "Design of a four-rotor aerial robot",In Friedrich, Werner \& Lim, Patrick, Proceeding of Australasian conference on robotics and automation, pp. 145-150, Nov 2002.
-\bibitem{ftcallocation} P. Baldi, B. Mogens, P. Castaldi, N. Mimmo and S. Simani, "Adaptive FTC based on control allocation and fault accommodation for satellite reaction wheels", IEEE, Conference on control and fault-tolerant Systems, vol. 3, pp672--677, Sept 2016.
-\bibitem{quaternionbackstep} R. Kristiansen and P.J. Nicklasson, "Satellite attitude control by quaternion-based backstepping", IEEE, Trans. on control systems technology, vol. 17, pp227--232, Jan 2009.
-\bibitem{allocation} T.A. Johansen and T.I. Fossen, "Control allocation - a Survey", Automatica, vol. 49, pp1087--1103, Jun 2013.
-\bibitem{ggress} G.R. Gress, "Lift fans as gyroscopes for controlling compact VTOL air vehicles: overview and development status of oblique active tilting", American Helicopter Society Forum, vol 63, May 2007.
-\bibitem{tiltingmodelling} M. Ryll and H. Bulthoff and P. Robuffo Giordano, "Modelling and control of a quadrotor UAV with tilting propellers", IEEE, Conference on robotics and automation, pp4606--4613, May 2012.
-2002.
-\bibitem{tiltingtest} M. Ryll and H. Bulthoff and P. Robuffo Giordano, "First flight tests of a quadrotor UAV with tilting propellers", IEEE, Conference on robotics and automation, pp295-302, Dec 2013.
-\bibitem{nemati} A. Nemati and M.Kumar, "Modelling and control of a single Axis tilting quadcopter", American control conference, pp3077--3082, Jun 2014.
-\bibitem{tiltgasco} P.S. Gasco and Y. Al-Rihani, "Development of a dual-axis tilt rotorcraft UAV", Univ. Cranfield, department of Engineering, Nov 2012.
-\bibitem{shoemaker} K. Shoemaker, "Quaternions", Univ. Pennsylvania, Department of computer and information science, 1987.
-\bibitem{nonlineardynamics} M. Bangura and R. Mahony, "Non-linear dynamic modeling for high performance control of a quadrotor", Australian robotics and automation association, Conference on robotics and automation, pp1--10, Dec 2012.
-\bibitem{lowreynolds} J. Brandt and M. Selig, "Propeller performance data at low Reynolds numbers", American institute of aeronautics and astronatics, Sciences meeting, vol. 49, pp 1--18, Jan 2011.
-\bibitem{lagrange} T. Thornton and J.B. Marion, "Classical dynamics of particles and systems", Thompson Brooks/Cole, 5th Edition, Ch 7, pp 228--289, 2003.
-\bibitem{bojelyapunov} E. Boje, "Lyapunov stability analysis", Univ. Kwazulu natal, Department of electrical, electronic and eomputer engineering, Control Systems: ENEL4CN, Jan 2005, unpublished.
-\bibitem{dualaxistilting} N. Von Klemperer, "Dual-axis tilting quadrotor aircraft", Univ. Cape Town,  Department of Electrical Engineering, Oct 2017, in press.
-\bibitem{rotation} D.D. Garanin, "Rotational motion of rigid bodies", Univ. New York, Department of engineering, Nov 2008.
-\bibitem{particletrajectories} F. van den Berg, A.P. Engelbrecht, "A study of particle swarm optimization particle trajectories", Univ. Pretoria, Department of computer science, Mar 2005.
+\bibitem{x4flyer} P. Pounds, R. Mahony, P. Hynes and J. Roberts,``Design of a four-rotor aerial robot", proc. Australasian conference on robotics and automation (\emph{ARAA}), vol. 3, pp. 145--150, Nov 2002.
+
+\bibitem{ftcallocation} P. Baldi, B. Mogens, P. Castaldi, N. Mimmo and S. Simani, ``Adaptive FTC based on control allocation and fault accommodation for satellite reaction wheels", IEEE, Conference on control and fault-tolerant Systems (\emph{SysTol}), vol. 3, pp.672--677, Sept 2016. 
+
+\bibitem{quaternionbackstep} R. Kristiansen and P.J. Nicklasson, ``Satellite attitude control by quaternion-based backstepping", IEEE, trans. Control systems technology, vol. 17, pp.227--232, January 2009.
+
+\bibitem{allocation} T.A. Johansen and T.I. Fossen, ``Control allocation - a Survey", Automatica, vol. 49, pp.1087--1103, June 2013.
+
+\bibitem{ggress} G.R. Gress, ``Lift fans as gyroscopes for controlling compact VTOL air vehicles: overview and development status of oblique active tilting", proc. American helicopter society forum, vol. 63, May 2007.
+
+\bibitem{tiltingmodelling} M. Ryll and H. Bulthoff and P. Robuffo Giordano, ``Modelling and control of a quadrotor UAV with tilting propellers", IEEE, International conference on robotics and automation (\emph{ICRA}), vol. 14, pp.4606--4613, May 2012.
+
+\bibitem{tiltingtest} M. Ryll and H. Bulthoff and P. Robuffo Giordano, ``First flight tests of a quadrotor UAV with tilting propellers", IEEE, International conference on robotics and automation (\emph{ICRA}), vol. 15, pp.295-302, December 2013.
+
+\bibitem{nemati} A. Nemati and M.Kumar, ``Modelling and control of a single Axis tilting quadcopter", IEEE, American control conference (\emph{ACC}), pp.3077--3082, June 2014.
+
+\bibitem{tiltgasco} P.S. Gasco and Y. Al-Rihani, ``A novel actuation concept for a multi rotor UAV", Springer Netherlands, Journal of intelligent \& robotic systems, vol. 74, pp.173--191, April 2014.
+
+\bibitem{shoemaker} K. Shoemake, ``Animating rotations with quaternion curves", The Singer Company, SIGGRAPH, vol. 3, no. 3, pp.245--254 July 1985.
+
+\bibitem{nonlineardynamics} M. Bangura and R. Mahony, ``Non-linear dynamic modelling for high performance control of a quadrotor", proc. Australasian robotics and automation association (\emph{ARAA}), Conference on robotics and automation, pp.1--10, Dec 2012.
+
+\bibitem{lowreynolds} J. Brandt and M. Selig, ``Propeller performance data at low Reynolds numbers", trans. American institute of aeronautics and astronautics (\emph{AIAA}), vol. 49, pp.1--18, Jan 2011.
+
+\bibitem{lagrange} T. Thornton and J.B. Marion, ``Classical dynamics of particles and systems", Thompson Brooks/Cole, 5th Edition, Ch 7, pp,228--289, 2003.
+
+\bibitem{dualaxistilting} N. Von Klemperer, "Dual-axis tilting quadrotor aircraft", Univ. Cape Town, Department of Electrical Engineering, Oct 2017, in press.
+
+\bibitem{rotation} 
+J.B Kuipers, "Quaternions and Rotation Sequences: A Primer with
+Applications to Orbits, Aerospace, and Virtual Reality", Univ. Press Princeton, pp.127--143, Sept 1999.
+
+\bibitem{bojelyapunov} M. Vidyasagar, "Nonlinear systems analysis", Society for industrial and applied mathematics, 2nd ed., pp.135-269, 2002.
+
+\bibitem{particletrajectories} F. van den Berg, A.P. Engelbrecht, "A study of particle swarm optimization particle trajectories", Elsevier, Journal of Informational Sciences, vol. 176, pp.937--971, April 2006.
 \end{thebibliography}
 \end{document}
