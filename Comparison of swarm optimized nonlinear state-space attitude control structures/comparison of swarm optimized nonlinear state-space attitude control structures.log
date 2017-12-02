@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9.6210 64-bit) (preloaded format=pdflatex 2017.3.22)  26 NOV 2017 09:03
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9.6210 64-bit) (preloaded format=pdflatex 2017.3.22)  2 DEC 2017 12:05
 entering extended mode
 **"./comparison of swarm optimized nonlinear state-space attitude control struc
 tures.tex"
@@ -106,50 +106,48 @@ es.aux")
 \openout1 = `"comparison of swarm optimized nonlinear state-space attitude cont
 rol structures.aux"'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Calculating math sizes for size <11> on input line 40.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Calculating math sizes for size <11> on input line 33.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <11> on input line 40.
+(Font)              <11> on input line 33.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7.69997> on input line 40.
+(Font)              <7.69997> on input line 33.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5.5> on input line 40.
+(Font)              <5.5> on input line 33.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 40.
+(Font)              <8> on input line 33.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 40.
+(Font)              <6> on input line 33.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 40.
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 40.
+(Font)              <5> on input line 33.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 33.
  ("C:\Program Files\MiKTeX 2.9\tex\latex\psnfss\ot1pcr.fd"
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
-Underfull \hbox (badness 10000) in paragraph at lines 40--40
-[][][]$[]$\OT1/ptm/m/n/8 Bernard D. Re-searcheris with the De-part-ment of Elec
--tri-cal
+Underfull \hbox (badness 4673) in paragraph at lines 33--33
+[][][]$[]$\OT1/ptm/m/n/8 Professor and Head of de-part-ment, Fac-ulty of Elec-t
+ri-cal En-
  []
 
 
-Underfull \hbox (badness 8075) in paragraph at lines 40--40
-\OT1/ptm/m/n/8 En-gi-neer-ing, Wright State Uni-ver-sity, Day-ton, OH 45435, US
-A
+Underfull \hbox (badness 5878) in paragraph at lines 33--33
+\OT1/ptm/m/n/8 gi-neer-ing, Uni-ver-sity of Cape Town, Cape Town, South Africa,
+
  []
 
-Missing character: There is no Ò in font ptmb7t!
-Missing character: There is no Ó in font ptmb7t!
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 80.
+(Font)              <7> on input line 70.
 Missing character: There is no Ò in font ptmr7t!
 Missing character: There is no Ó in font ptmr7t!
 Missing character: There is no Ò in font ptmr7t!
@@ -332,9 +330,7 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the US letter (8.5in X 11in) paper size.
 
-[3
-
-]
+[3]
 ("comparison of swarm optimized nonlinear state-space attitude control structur
 es.aux") ) 
 Here is how much of TeX's memory you used:
@@ -357,7 +353,7 @@ iKTeX 2.9/fonts/type1/urw/times/utmbi8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/
 type1/urw/times/utmr8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/times/u
 tmri8a.pfb>
 Output written on "comparison of swarm optimized nonlinear state-space attitude
- control structures.pdf" (3 pages, 125683 bytes).
+ control structures.pdf" (3 pages, 128204 bytes).
 PDF statistics:
  57 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
